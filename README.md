@@ -26,4 +26,5 @@ Arguments:
 "-s", "--model_save"  Output directory to save the model
 
 Example input:
+
 python bert_eval_main.py -m matbert_cased -o matbert_cased_polymerabstracts_eval.json -s matbert_cased_pa -c polymerabstracts

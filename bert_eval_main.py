@@ -455,6 +455,10 @@ class evaluate_corpus_model():
         self.trainer.train()
 
         # Plot and save loss/metrics
+        folder_path = "eval_results/"
+
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
         self.save_loss_to_json(self.trainer.state.log_history, "eval_results/"+self.cheeky_png(eval_output))
 
         # Save model and tokenizer
@@ -534,7 +538,7 @@ class evaluate_corpus_model():
         learning_rate=5e-5,
         per_device_train_batch_size=self.batch_size,
         per_device_eval_batch_size=self.batch_size,
-        num_train_epochs=3,
+        num_train_epochs=10,
         weight_decay=0.01,
         eval_strategy="epoch",
         logging_strategy='epoch',
@@ -588,4 +592,3 @@ class evaluate_corpus_model():
     
 
 eval = evaluate_corpus_model(args.model, args.corpus, args.model_save, args.output)
-print("Evaluation complete. Results saved to eval_results/"+args.output)

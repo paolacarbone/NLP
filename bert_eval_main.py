@@ -7,6 +7,9 @@ from functools import partial
 import json
 import argparse
 import matplotlib.pyplot as plt
+import os
+from pathlib import Path
+import urllib.request
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--model", type=str,
@@ -306,11 +309,49 @@ class load_model():
         self.tokenizer, self.model = self.choose_model()
         return
 
+    def download_matbert(self):
+        MODEL_PATH = Path.cwd()  # Replace with your actual path
+
+        # Define model directories
+        models = {
+            "matbert-base-cased": [
+                "config.json",
+                "vocab.txt",
+                "pytorch_model.bin"
+            ],
+            "matbert-base-uncased": [
+                "config.json",
+                "vocab.txt",
+                "pytorch_model.bin"
+            ]
+        }
+
+        # Base URLs for downloads
+        model_choice = self.model_choice.lower()
+        if model_choice == "matbert_cased":
+            model_name = "matbert-base-cased"
+            base_url = "https://cedergroup-share.s3-us-west-2.amazonaws.com/public/MatBERT/model_2Mpapers_cased_30522_wd/"
+        elif model_choice == "matbert_uncased":
+            model_name = "matbert-base-uncased"
+            base_url = "https://cedergroup-share.s3-us-west-2.amazonaws.com/public/MatBERT/model_2Mpapers_uncased_30522_wd/"
+
+        # Create directories and download missing files
+        model_dir = MODEL_PATH / model_name
+        model_dir.mkdir(parents=True, exist_ok=True)
+
+        for file_name in models[model_name]:
+            file_path = model_dir / file_name
+            if not file_path.exists():
+                url = base_url + file_name
+                print(f"Downloading {file_name} to {file_path}...")
+                urllib.request.urlretrieve(url, file_path)
+
     
     def choose_model(self):
         model = self.model_choice.lower()
 
         if model == "matbert_uncased":
+            self.download_matbert()
             model_checkpoint = "matbert-base-uncased"
             tokenizer = BertTokenizerFast.from_pretrained(model_checkpoint, model_max_len=512)
 
@@ -320,6 +361,7 @@ class load_model():
                 label2id=self.label2id,
             )
         if model == "matbert_cased":
+            self.download_matbert()
             model_checkpoint = "matbert-base-cased"
             tokenizer = BertTokenizerFast.from_pretrained(model_checkpoint, model_max_len=512)
 
